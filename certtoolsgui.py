@@ -1,17 +1,17 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkaddons import XYScrolledText
-import tkinter.font as font
 from certtools import x509Cert
 from json import dumps
 import OpenSSL.crypto
+from tkinter import ttk
 
 SMALL = {"Text": {"X": 51, "Y": 10}, "Window": {"X": 470, "Y": 260}}
 MEDIUM = {"Text": {"X": 70, "Y": 25}, "Window": {"X": 581, "Y": 500}}
 LARGE = {"Text": {"X": 100, "Y": 40}, "Window": {"X": 821, "Y": 741}}
 
 
-class Application(tk.Frame):
+class Application(ttk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
@@ -19,6 +19,8 @@ class Application(tk.Frame):
         self.master.iconbitmap("pycerttools.ico")
         self.size = MEDIUM
         self.master.minsize(self.size["Window"]["X"], self.size["Window"]["Y"])
+        self.style = ttk.Style()
+        self.style.theme_use("winnative")
         self.pack()
         self.create_widgets()
         self.create_context_menu()
@@ -27,20 +29,18 @@ class Application(tk.Frame):
         self.cert_buffer = ""
 
     def create_widgets(self):
-        btn_font = font.Font(size=12)
-        lbl_font = font.Font(size=14, weight="bold")
-        self.lbl_input = tk.Label(master=self, text='Cert Text', font=lbl_font)
+        self.lbl_input = ttk.Label(master=self, text='Cert Text', font="arial 16")
         self.lbl_input.pack()
         self.txt_input = XYScrolledText(master=self, width=self.size["Text"]["X"],
                                         height=self.size["Text"]["Y"], wrap=tk.NONE)
         self.txt_input.pack()
-        self.btn_input = tk.Button(master=self, text='parse', font=btn_font)
-        self.btn_input.pack(side=tk.LEFT, padx=50, pady=10)
-        self.btn_json = tk.Button(master=self, text='json', font=btn_font)
+        self.btn_input = ttk.Button(master=self, text='parse')
+        self.btn_input.pack(side=tk.LEFT, padx=20, pady=10)
+        self.btn_json = ttk.Button(master=self, text='json')
         self.btn_json.pack(side=tk.LEFT, padx=20, pady=10)
-        self.btn_clear = tk.Button(master=self, text='clear', font=btn_font)
-        self.btn_clear.pack(side=tk.RIGHT, padx=50, pady=10)
-        self.btn_open = tk.Button(master=self, text='open', font=btn_font)
+        self.btn_clear = ttk.Button(master=self, text='clear')
+        self.btn_clear.pack(side=tk.RIGHT, padx=20, pady=10)
+        self.btn_open = ttk.Button(master=self, text='open')
         self.btn_open.pack(side=tk.RIGHT, padx=20, pady=10)
 
     def create_menubar(self):
@@ -178,17 +178,15 @@ class Application(tk.Frame):
         except FileNotFoundError:
             _license = "Someone's been bad and removed my license. I'm not mad, I'm just disappointed."
 
-        link_font = font.Font(size=8)
         self.win_license = tk.Tk()
         self.win_license.title("PyCertTools License")
         self.win_license.iconbitmap("pycerttools.ico")
         self.msg_license = tk.Message(self.win_license, text=_license)
 
         self.msg_license.pack()
-        self.lbl_jinjalicense = tk.Label(master=self.win_license, text="Jinja2 License", font=link_font, fg="blue")
+        self.lbl_jinjalicense = ttk.Label(master=self.win_license, text="Jinja2 License", foreground="blue")
         self.lbl_jinjalicense.pack()
-        self.lbl_pyopenssllicense = tk.Label(master=self.win_license, text="PyOpenSSL License",
-                                             font=link_font, fg="blue")
+        self.lbl_pyopenssllicense = ttk.Label(master=self.win_license, text="PyOpenSSL License", foreground="blue")
         self.lbl_pyopenssllicense.pack()
         self.lbl_jinjalicense.bind('<Button-1>', lambda x: webbrowser.open("https://palletsprojects.com/license/"))
         self.lbl_pyopenssllicense.bind('<Button-1>', lambda x: webbrowser.open("https://raw.githubusercontent.com"
