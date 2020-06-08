@@ -6,12 +6,9 @@ from certtools import x509Cert
 from json import dumps
 import OpenSSL.crypto
 
-SMALL = {"Text": {"X": 51, "Y": 10}, "Window": {"X": 470, "Y": 260}, "Padding": .4}
-MEDIUM = {"Text": {"X": 70, "Y": 25}, "Window": {"X": 581, "Y": 500}, "Padding": .7}
-LARGE = {"Text": {"X": 100, "Y": 40}, "Window": {"X": 821, "Y": 741}, "Padding": 1}
-
-with open("LICENSE", "r") as file:
-    _license = file.read()
+SMALL = {"Text": {"X": 51, "Y": 10}, "Window": {"X": 470, "Y": 260}}
+MEDIUM = {"Text": {"X": 70, "Y": 25}, "Window": {"X": 581, "Y": 500}}
+LARGE = {"Text": {"X": 100, "Y": 40}, "Window": {"X": 821, "Y": 741}}
 
 
 class Application(tk.Frame):
@@ -92,7 +89,7 @@ class Application(tk.Frame):
                                               filetypes=[("all files", "*.*")])
         if filename == '':
             return "break"
-        with open(filename, "r+") as certfile:
+        with open(filename, "r") as certfile:
             self.clear("clear() spawned from open_file()")
             self.txt_input.insert("1.0", certfile.read())
         print(filename)
@@ -143,8 +140,6 @@ class Application(tk.Frame):
         self.txt_input.insert('insert', text)
 
     def prepare_cert(self, event=None):
-        print(self.master.winfo_height())
-        print(self.master.winfo_width())
         print(event)
         try:
             data = self.txt_input.get(1.0, tk.END)
@@ -177,6 +172,12 @@ class Application(tk.Frame):
 
     def license(self):
         import webbrowser
+        try:
+            with open("LICENSE", "r") as file:
+                _license = file.read()
+        except FileNotFoundError:
+            _license = "Someone's been bad and removed my license. I'm not mad, I'm just disappointed."
+
         link_font = font.Font(size=8)
         self.win_license = tk.Tk()
         self.win_license.title("PyCertTools License")
@@ -189,9 +190,9 @@ class Application(tk.Frame):
         self.lbl_pyopenssllicense = tk.Label(master=self.win_license, text="PyOpenSSL License",
                                              font=link_font, fg="blue")
         self.lbl_pyopenssllicense.pack()
-        self.lbl_jinjalicense.bind('<Button-1>', lambda x : webbrowser.open("https://palletsprojects.com/license/"))
+        self.lbl_jinjalicense.bind('<Button-1>', lambda x: webbrowser.open("https://palletsprojects.com/license/"))
         self.lbl_pyopenssllicense.bind('<Button-1>', lambda x: webbrowser.open("https://raw.githubusercontent.com"
-                                                                             "/pyca/pyopenssl/master/LICENSE"))
+                                                                               "/pyca/pyopenssl/master/LICENSE"))
 
 
 def run():
