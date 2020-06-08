@@ -1,8 +1,9 @@
 from OpenSSL import crypto
 import sys
-from pprint import pprint
+from pprint import pprint, pformat
 import atexit
 from jinja2 import Template
+from json import dumps
 
 
 class x509Cert:
@@ -35,17 +36,33 @@ class x509Cert:
                 "Expired": self.expired,
                 "Signature_Algorithm": self.algorithm.decode(),
                 "Serial_Number": self.serial}
-
-
+        if "subjectAltName" in json["Extensions"].keys():
+            json["Subject_Alt_Name"] = json["Extensions"].pop("subjectAltName")
+            data = json["Subject_Alt_Name"].pop("Data").split(',')
+            try:
+                for i in data:
+                    k, v = i.split(':')
+                    k = k.strip()
+                    v = v.strip()
+                    if k not in json["Subject_Alt_Name"].keys():
+                        json["Subject_Alt_Name"][k] = []
+                    json["Subject_Alt_Name"][k].append(v)
+            except:
+                print(data)
+                input('stopped')
         return json
+
+    def to_json_pretty(self):
+        return pformat(self.to_json())
 
     def print(self):
         template = """Subject: 
 {% for key, value in x509json.Subject.items() %}\t{{ key }}: {{ value }} \n{% endfor %}
 Issuer:
-{% for key, value in x509json.Issuer.items() %}\t{{ key }}: {{ value }} {% endfor %}
+{% for key, value in x509json.Issuer.items() %}\t{{ key }}: {{ value }} \n{% endfor %}
 Extensions:
 {% for key, value in x509json.Extensions.items() %}\t{{ key }}: {% for k, v in value.items() %}\t{{ k }}: {{ v }}\n{% endfor %} {% endfor %}
+{% if "Subject_Alt_Name" in x509json.keys() %}Subject Alt Names:\n{% for k,v in x509json.Subject_Alt_Name.items() %}\t{{ k }}:\n{% if v is iterable and v is not string %}{% for x in v %}\t\t{{ x }}\n{% endfor %}{% else %}\t\t{{ v }}\n{% endif %}{% endfor %}{% endif %} 
 Not Before: {{ x509json.Not_Before }}
 Not After: {{ x509json.Not_After }}
 Expired: {{ x509json.Expired }}
@@ -134,7 +151,7 @@ if __name__ == '__main__':
                 sys.exit(1)
     try:
         if sys.argv[2] == "json":
-            pprint(cert.to_json())
+            print(dumps(cert.to_json()))
         elif sys.argv[2] == "text":
             print(cert.print())
     except IndexError:
